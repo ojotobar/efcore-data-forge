@@ -1,19 +1,22 @@
-﻿using System.Linq.Expressions;
+﻿using EFCore.CrudKit.Library.Models;
+using System.Linq.Expressions;
 
 namespace EFCore.CrudKit.Library.Data.Interfaces
 {
-    public interface IEFCoreCrudKit<TEntity>
+    public interface IEFCoreCrudKit
     {
-        IQueryable<TEntity> AsQueryable(Expression<Func<TEntity, bool>> predicate, bool trackChanges);
-        Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate);
-        Task DeleteAsync(TEntity entity, bool saveNow = true, CancellationToken cancellation = default);
-        Task DeleteRangeAsync(List<TEntity> entities, bool saveNow = true, CancellationToken cancellation = default);
-        Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate);
-        Task<TEntity?> FindByIdAsync(Guid id, bool trackChanges);
-        Task InsertAsync(TEntity entity, bool saveNow = true, CancellationToken cancellation = default);
-        Task InsertRangeAsync(List<TEntity> entities, bool saveNow = true, CancellationToken cancellation = default);
+        IQueryable<TEntity> AsQueryable<TEntity>(Expression<Func<TEntity, bool>> predicate, bool trackChanges) where TEntity : EntityBase;
+        Task<int> CountAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : EntityBase;
+        Task DeleteAsync<TEntity>(TEntity entity, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
+        Task DeleteRangeAsync<TEntity>(List<TEntity> entities, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
+        Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : EntityBase;
+        Task<TEntity?> FindByIdAsync<TEntity>(Guid id, bool trackChanges) where TEntity : EntityBase;
+        Task InsertAsync<TEntity>(TEntity entity, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
+        Task InsertRangeAsync<TEntity>(List<TEntity> entities, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
         Task<int> SaveAsync(CancellationToken cancellation = default);
-        Task UpdateAsync(TEntity entity, bool saveNow = true, CancellationToken cancellation = default);
-        Task UpdateRangeAsync(List<TEntity> entities, bool saveNow = true, CancellationToken cancellation = default);
+        Task ToggleAsync<TEntity>(TEntity entity, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
+        Task ToggleAsync<TEntity>(List<TEntity> entities, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
+        Task UpdateAsync<TEntity>(TEntity entity, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
+        Task UpdateRangeAsync<TEntity>(List<TEntity> entities, bool saveNow = true, CancellationToken cancellation = default) where TEntity : EntityBase;
     }
 }
