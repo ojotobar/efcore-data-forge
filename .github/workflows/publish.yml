@@ -47,12 +47,7 @@ jobs:
 
       - name: Publish to NuGet
         if: success()
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         working-directory: src/EFCore.CrudKit.Library
         run: |
           echo "Publishing package(s) in src/EFCore.CrudKit.Library/out/ ..."
-          dotnet nuget push "src/EFCore.CrudKit.Library/out/*.nupkg" \
-            --api-key "$NUGET_API_KEY" \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+          dotnet nuget push out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
