@@ -1,0 +1,37 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Pack NuGet package
+        run: dotnet pack EFCore.CrudKit.csproj \
+               --configuration Release \
+               --no-build \
+               -p:PackageId=EFCore.DataForge \
+               -p:Version=${GITHUB_REF_NAME#v} \
+               -o out
+
+      - name: Publish to NuGet
+        run: dotnet nuget push "out/*.nupkg" \
+               --api-key ${{ secrets.NUGET_API_KEY }} \
+               --source https://api.nuget.org/v3/index.json
