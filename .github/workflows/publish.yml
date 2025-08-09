@@ -3,7 +3,7 @@ name: Publish NuGet Package
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*.*.*'  # trigger only on tags like v1.0.0, v1.0.0-rc, etc.
 
 jobs:
   build:
@@ -12,6 +12,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch full history so git branch check works
+
+      - name: Verify tag commit is on master branch
+        run: |
+          TAG_COMMIT_SHA=${GITHUB_SHA}
+          echo "Tag commit SHA: $TAG_COMMIT_SHA"
+          if git branch --contains "$TAG_COMMIT_SHA" | grep -q 'master'; then
+            echo "✅ Tag commit is on master branch."
+          else
+            echo "⚠️ Tag commit is NOT on master branch. Exiting early."
+            exit 78  # 78 = neutral exit, marks job as skipped in some runners
+          fi
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -48,6 +61,8 @@ jobs:
       - name: Publish to NuGet
         if: success()
         working-directory: src/EFCore.CrudKit.Library
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           echo "Publishing package(s) in src/EFCore.CrudKit.Library/out/ ..."
-          dotnet nuget push out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push out/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
