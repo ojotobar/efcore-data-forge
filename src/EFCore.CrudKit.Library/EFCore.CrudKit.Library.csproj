@@ -11,10 +11,12 @@
 	<PackageTags>EntityFramework;CRUD;EF Core;Database</PackageTags>
 	<RepositoryUrl>https://github.com/ojotobar/efcore-data-forge</RepositoryUrl>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.19" />
+	<None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
