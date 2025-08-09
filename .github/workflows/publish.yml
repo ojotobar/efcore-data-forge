@@ -35,8 +35,8 @@ jobs:
       - name: Pack NuGet package
         run: |
           echo "Packing EFCore.DataForge version: $VERSION"
-          cd src/EFCore.CrudKit
-          dotnet pack EFCore.CrudKit.csproj \
+          cd src/EFCore.CrudKit.Library
+          dotnet pack EFCore.CrudKit.Library.csproj \
             --no-build \
             -p:Configuration=Release \
             -p:PackageId=EFCore.DataForge \
