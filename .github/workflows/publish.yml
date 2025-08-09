@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,18 +21,33 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build project
+      - name: Build project (Release)
         run: dotnet build --configuration Release
 
+      - name: Set package version from tag
+        # GITHUB_REF is like "refs/tags/v1.2.3"
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          TAG=${TAG#v}
+          echo "Detected tag: $TAG"
+          echo "VERSION=$TAG" >> $GITHUB_ENV
+
       - name: Pack NuGet package
-        run: dotnet pack EFCore.CrudKit.csproj \
-               --configuration Release \
-               --no-build \
-               -p:PackageId=EFCore.DataForge \
-               -p:Version=${GITHUB_REF_NAME#v} \
-               -o out
+        run: |
+          echo "Packing EFCore.DataForge version: $VERSION"
+          dotnet pack EFCore.CrudKit.csproj \
+            --no-build \
+            -p:Configuration=Release \
+            -p:PackageId=EFCore.DataForge \
+            -p:Version="$VERSION" \
+            -o out
 
       - name: Publish to NuGet
-        run: dotnet nuget push "out/*.nupkg" \
-               --api-key ${{ secrets.NUGET_API_KEY }} \
-               --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          echo "Publishing package(s) in out/ ..."
+          dotnet nuget push "out/*.nupkg" \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
