@@ -30,7 +30,7 @@ jobs:
       - name: Get current version from csproj
         id: get_version
         run: |
-          VERSION=$(xmllint --xpath "string(//Version)" src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj)
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj)
           echo "Current version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
