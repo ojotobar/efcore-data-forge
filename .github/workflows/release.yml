@@ -62,4 +62,14 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          dotnet nuget push out/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push out/*.nupkg \
+            --api-key $NUGET_API_KEY \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+      
+      - name: Delete version-bump branch
+        if: github.event.pull_request.head.ref == 'version-bump'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git push origin --delete version-bump || echo "Branch already deleted"
