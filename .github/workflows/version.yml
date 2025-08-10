@@ -87,14 +87,14 @@ jobs:
 
       - name: Push version bump branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git push origin HEAD:refs/heads/version-bump --force
 
       - name: Create Pull Request to master
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           base: master
           head: version-bump
           title: "Version bump to ${{ env.NEW_VERSION }}"
