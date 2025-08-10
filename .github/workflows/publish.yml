@@ -24,7 +24,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj
+        run: dotnet restore EFCore.CrudKit.sln
 
       - name: Get current version from csproj
         id: get_version
@@ -69,11 +69,11 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "New version: $NEW_VERSION"
 
-      - name: Build project
-        run: dotnet test EFCore.CrudKit.sln --configuration Release --no-restore --verbosity normal
+      - name: Build solution
+        run: dotnet build EFCore.CrudKit.sln --configuration Release --no-restore --verbosity normal
 
-      #- name: Run tests (fail on any test failure)
-      #  run: dotnet test --configuration Release --no-build --verbosity normal
+      - name: Run tests (fail on any test failure)
+        run: dotnet test EFCore.CrudKit.sln --configuration Release --no-build --verbosity normal
 
       - name: Pack NuGet package
         run: dotnet pack src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-build -o ./artifacts
