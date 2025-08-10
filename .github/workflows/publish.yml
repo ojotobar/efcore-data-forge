@@ -76,7 +76,7 @@ jobs:
         run: dotnet test EFCore.CrudKit.sln --configuration Release --no-build --verbosity normal
 
       - name: Pack NuGet package
-        run: dotnet pack src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-build -o ./artifacts
+        run: dotnet pack src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj -p:Configuration=Release -p:PackageId=EFCore.DataForge --no-build -o ./artifacts
 
       - name: Push package to NuGet
         run: dotnet nuget push "./artifacts/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
