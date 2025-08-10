@@ -70,7 +70,7 @@ jobs:
           echo "New version: $NEW_VERSION"
 
       - name: Build project
-        run: dotnet build src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-restore
+        run: dotnet test EFCore.CrudKit.sln --configuration Release --no-restore --verbosity normal
 
       - name: Run tests (fail on any test failure)
         run: dotnet test --configuration Release --no-build --verbosity normal
