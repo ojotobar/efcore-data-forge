@@ -73,14 +73,13 @@ jobs:
           git commit -m "Bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit"
           git push origin version-bump --force
 
-      - name: Create PR
+      - name: Create Pull Request to master
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          base: master
-          head: version-bump
-          title: "Version bump to ${{ env.NEW_VERSION }}"
-          body: "Automated version bump from development branch."
-          branch: version-bump
-          delete-branch: false
-          draft: false
+            token: ${{ secrets.PAT_TOKEN }}
+            base: master
+            branch: version-bump
+            title: "Version bump to ${{ env.NEW_VERSION }}"
+            body: "Automated version bump from development branch."
+            draft: true
+            delete-branch: false
