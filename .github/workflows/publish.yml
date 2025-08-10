@@ -72,8 +72,8 @@ jobs:
       - name: Build project
         run: dotnet test EFCore.CrudKit.sln --configuration Release --no-restore --verbosity normal
 
-      - name: Run tests (fail on any test failure)
-        run: dotnet test --configuration Release --no-build --verbosity normal
+      #- name: Run tests (fail on any test failure)
+      #  run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack NuGet package
         run: dotnet pack src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-build -o ./artifacts
