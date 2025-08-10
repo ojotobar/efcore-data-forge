@@ -1,4 +1,4 @@
-name: Auto Version Bump & Publish NuGet
+name: Auto Version Bump, Test & Publish NuGet
 
 on:
   pull_request:
@@ -71,6 +71,9 @@ jobs:
 
       - name: Build project
         run: dotnet build src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-restore
+
+      - name: Run tests (fail on any test failure)
+        run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack NuGet package
         run: dotnet pack src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-build -o ./artifacts
