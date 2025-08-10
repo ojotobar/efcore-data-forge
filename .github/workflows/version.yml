@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_PAT }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -89,15 +89,14 @@ jobs:
           git commit -m "Bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit"
 
       - name: Push version bump branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git remote set-url origin https://x-access-token:${{ secrets.CI_PAT }}@github.com/${{ github.repository }}.git
           git push origin version-bump --force
 
       - name: Create Pull Request to master
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_PAT }}
           branch: version-bump
           delete-branch: true
           base: master
