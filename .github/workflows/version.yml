@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   version-bump:
@@ -89,14 +90,7 @@ jobs:
           git push origin HEAD:refs/heads/version-bump --force
 
       - name: Install GitHub CLI
-        run: |
-          sudo snap install gh --classic
-
-      - name: Authenticate GitHub CLI
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo $GITHUB_TOKEN | gh auth login --with-token
+        run: sudo snap install gh --classic
 
       - name: Create Pull Request
         env:
