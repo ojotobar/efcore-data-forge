@@ -1,0 +1,65 @@
+name: Release on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore --no-cache
+
+      - name: Build project (Release)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Get version from csproj
+        id: get_version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj)
+          echo "Version from csproj: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create Git tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Pack NuGet package
+        working-directory: src/EFCore.CrudKit.Library
+        run: |
+          dotnet pack EFCore.CrudKit.Library.csproj \
+            --no-build \
+            -p:Configuration=Release \
+            -p:PackageId=EFCore.DataForge \
+            -p:Version="$VERSION" \
+            -o out
+
+      - name: Publish to NuGet
+        working-directory: src/EFCore.CrudKit.Library
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push out/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
