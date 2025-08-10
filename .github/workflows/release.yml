@@ -1,68 +1,93 @@
-name: Release on PR Merge
+name: Version Bump
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
-      - master
+      - development
 
 jobs:
-  release:
-    if: github.event.pull_request.merged == true
+  bump-version:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout master
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: master
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+      - name: Merge development into master (locally)
+        run: |
+          git fetch origin development
+          git merge --no-edit origin/development || true
 
-      - name: Restore dependencies
-        run: dotnet restore --no-cache
-
-      - name: Build project (Release)
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
-
-      - name: Get version from csproj
+      - name: Get current version from csproj
         id: get_version
         run: |
           VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version from csproj: $VERSION"
+          echo "Current version: $VERSION"
 
-      - name: Create Git tag
+      - name: Bump version
+        id: bump_version
+        run: |
+          FULL_VERSION="$VERSION"
+          CORE_VERSION="${FULL_VERSION%%-*}"
+          PRERELEASE="${FULL_VERSION#"$CORE_VERSION"}"
+          PRERELEASE="${PRERELEASE#-}"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<<"$CORE_VERSION"
+
+          if [ -z "$PRERELEASE" ] || [ "$PRERELEASE" = "$FULL_VERSION" ]; then
+            PATCH=$((PATCH + 1))
+            if [ "$PATCH" -gt 9 ]; then
+              PATCH=0
+              MINOR=$((MINOR + 1))
+            fi
+            if [ "$MINOR" -gt 9 ]; then
+              MINOR=0
+              MAJOR=$((MAJOR + 1))
+            fi
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          else
+            PR_LABEL="${PRERELEASE%%.*}"
+            PR_NUM="${PRERELEASE#"$PR_LABEL."}"
+            if ! [[ "$PR_NUM" =~ ^[0-9]+$ ]]; then
+              PR_NUM=1
+            else
+              PR_NUM=$((PR_NUM + 1))
+            fi
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-$PR_LABEL.$PR_NUM"
+          fi
+
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "New version: $NEW_VERSION"
+
+      - name: Update csproj with new version
+        run: |
+          sed -i "s|<Version>.*</Version>|<Version>$NEW_VERSION</Version>|" src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj
+
+      - name: Commit version bump
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B version-bump
+          git add src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj
+          git commit -m "Bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit"
+
+      - name: Push version bump branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
+          git push origin version-bump --force
 
-      - name: Pack NuGet package
-        working-directory: src/EFCore.CrudKit.Library
-        run: |
-          dotnet pack EFCore.CrudKit.Library.csproj \
-            --no-build \
-            -p:Configuration=Release \
-            -p:PackageId=EFCore.DataForge \
-            -p:Version="$VERSION" \
-            -o out
-
-      - name: Publish to NuGet
-        working-directory: src/EFCore.CrudKit.Library
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          dotnet nuget push out/*.nupkg \
-            --api-key $NUGET_API_KEY \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+      - name: Create pull request to master
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: master
+          branch: version-bump
+          title: "Bump version to ${{ env.NEW_VERSION }}"
+          body: "Automated version bump from development branch."
+          delete-branch: true
