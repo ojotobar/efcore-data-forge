@@ -1,0 +1,61 @@
+name: Auto Version Bump & Publish NuGet
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master' && github.event.pull_request.head.ref == 'development'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.CI_PAT }} # Personal access token, not default GITHUB_TOKEN
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj
+
+      - name: Get current version
+        id: get_version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Current version: $VERSION"
+
+      - name: Bump patch version
+        id: bump_version
+        run: |
+          IFS='.' read -r MAJOR MINOR PATCH <<<"${VERSION%%-*}"
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          sed -i "s|<Version>.*</Version>|<Version>$NEW_VERSION</Version>|" src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "Bumped version: $NEW_VERSION"
+
+      - name: Commit new version to master
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj
+          git commit -m "Bump version to $NEW_VERSION [skip ci]"
+          git push origin master
+
+      - name: Build project
+        run: dotnet build src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-restore
+
+      - name: Pack NuGet package
+        run: dotnet pack src/EFCore.CrudKit.Library/EFCore.CrudKit.Library.csproj --configuration Release --no-build -o ./artifacts
+
+      - name: Push package to NuGet
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
