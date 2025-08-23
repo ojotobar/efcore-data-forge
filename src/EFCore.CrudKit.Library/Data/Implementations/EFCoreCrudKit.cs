@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace EFCore.CrudKit.Library.Data.Implementations
 {
-    public class EFCoreCrudKit<TContext>(TContext context) : IEFCoreCrudKit where TContext : DbContext
+    public sealed class EFCoreCrudKit<TContext>(TContext context) : IEFCoreCrudKit where TContext : DbContext
     {
         private readonly TContext _context = context;
 
