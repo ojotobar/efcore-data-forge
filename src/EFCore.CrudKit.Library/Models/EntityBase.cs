@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EFCore.CrudKit.Library.Models
+﻿namespace EFCore.CrudKit.Library.Models
 {
     public abstract class EntityBase
     {
