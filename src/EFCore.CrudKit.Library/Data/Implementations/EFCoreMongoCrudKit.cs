@@ -19,6 +19,11 @@ namespace EFCore.CrudKit.Library.Data.Implementations
             _database = client.GetDatabase(settings.DatabaseName);
         }
 
+        public EFCoreMongoCrudKit(IMongoDatabase database)
+        {
+            _database = database;
+        }
+
         /// <summary>
         /// Inserts a single <paramref name="TCollection"/> document into the collection
         /// </summary>

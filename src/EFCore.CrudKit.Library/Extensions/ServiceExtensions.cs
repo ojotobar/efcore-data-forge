@@ -50,12 +50,35 @@ namespace EFCore.CrudKit.Library.Extensions
         /// </summary>
         /// <typeparam name="TContext"></typeparam>
         /// <param name="services"></param>
+        /// <param name="configuration"></param>
+        /// <param name="sectionName"></param>
         /// <param name="asSingleton"></param>
         public static void ConfigureEFCoreDataForgeManager<TContext>(this IServiceCollection services, 
             IConfiguration configuration, string sectionName = "EFCoreDataForge", bool asSingleton = true) where TContext : DbContext
         {
             services.Configure<EFCoreDataForgeOptions>(configuration.GetSection(sectionName));
 
+            if (asSingleton)
+            {
+                services.AddSingleton<IEFCoreDataForgeManager, EFCoreDataForgeManager<TContext>>();
+            }
+            else
+            {
+                services.AddScoped<IEFCoreDataForgeManager, EFCoreDataForgeManager<TContext>>();
+            }
+        }
+
+        /// <summary>
+        /// Registers the EFCore.DataForge Manager in the DI. Yu only need to call this method 
+        /// if need to connected using both SQL and MongoDB
+        /// You should have an instance of IMongoDatabase already registered if you prefer this set up.
+        /// This method does not require you to have the EFCoreDataForge options in your appsettings
+        /// </summary>
+        /// <typeparam name="TContext"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="asSingleton"></param>
+        public static void ConfigureEFCoreDataForgeManager<TContext>(this IServiceCollection services, bool asSingleton = true) where TContext : DbContext
+        {
             if (asSingleton)
             {
                 services.AddSingleton<IEFCoreDataForgeManager, EFCoreDataForgeManager<TContext>>();
