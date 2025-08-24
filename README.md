@@ -103,6 +103,10 @@ builder.Services.ConfigureMongoEFCoreDataForge();
 // You only need to register this if you're going to use both SQL and MongoDB
 // Specify the appsettings.json section name. Default is EFCoreDataForge
 builder.Services.ConfigureEFCoreDataForgeManager<TContext>(builder.Configuration);
+
+// You may use this overload if you already have an instance of IMongoDatabase registered in the DI Container
+// In this case, you don't know need to have the above configurations in your appsettings.json
+buider.Services.ConfigureEFCoreDataForgeManager<TContext>()
 ```
 
 ---

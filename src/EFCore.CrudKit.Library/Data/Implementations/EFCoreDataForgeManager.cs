@@ -2,6 +2,7 @@
 using EFCore.CrudKit.Library.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace EFCore.CrudKit.Library.Data.Implementations
 {
@@ -17,6 +18,15 @@ namespace EFCore.CrudKit.Library.Data.Implementations
 
             _mongoCrudKit = new Lazy<IEFCoreMongoCrudKit>(() =>
                 new EFCoreMongoCrudKit(dataForgeSettings.Value));
+        }
+
+        public EFCoreDataForgeManager(TContext dbContext, IMongoDatabase database)
+        {
+            _sqlrudKit = new Lazy<IEFCoreCrudKit>(() =>
+                new EFCoreCrudKit<TContext>(dbContext));
+
+            _mongoCrudKit = new Lazy<IEFCoreMongoCrudKit>(() =>
+                new EFCoreMongoCrudKit(database));
         }
 
         public IEFCoreCrudKit SQL => _sqlrudKit.Value;
