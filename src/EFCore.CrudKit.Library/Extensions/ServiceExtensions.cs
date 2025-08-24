@@ -36,8 +36,33 @@ namespace EFCore.CrudKit.Library.Extensions
         /// </summary>
         /// <param name="services"></param>
         /// <param name="asSingleton"></param>
-        public static void ConfigureMongoEFCoreDataForge(this IServiceCollection services, bool asSingleton = true, 
-            IdSerializationMode idSerializationMode = IdSerializationMode.ObjectId)
+        public static void ConfigureMongoEFCoreDataForge(this IServiceCollection services, IConfiguration configuration, 
+            string sectionName = "EFCoreDataForge", bool asSingleton = true, IdSerializationMode idSerializationMode = IdSerializationMode.ObjectId)
+        {
+            services.Configure<EFCoreDataForgeOptions>(configuration.GetSection(sectionName));
+            ConfigureIdSerialization(idSerializationMode);
+
+            if (asSingleton)
+            {
+                services.AddSingleton<IEFCoreMongoCrudKit, EFCoreMongoCrudKit>();
+            }
+            else
+            {
+                services.AddScoped<IEFCoreMongoCrudKit, EFCoreMongoCrudKit>();
+            }
+        }
+
+        /// <summary>
+        /// Registers the service in the DI Container
+        /// This overload does not require you to have the 
+        /// EFCoreDataForge section in your appsettings.json
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration"></param>
+        /// <param name="asSingleton"></param>
+        /// <param name="idSerializationMode"></param>
+        public static void ConfigureMongoEFCoreDataForge(this IServiceCollection services, IConfiguration configuration, 
+            bool asSingleton = true, IdSerializationMode idSerializationMode = IdSerializationMode.ObjectId)
         {
             ConfigureIdSerialization(idSerializationMode);
 
