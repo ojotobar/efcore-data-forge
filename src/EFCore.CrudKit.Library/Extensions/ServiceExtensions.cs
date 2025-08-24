@@ -4,6 +4,10 @@ using EFCore.CrudKit.Library.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson;
+using EFCore.CrudKit.Library.Models.Enums;
 
 namespace EFCore.CrudKit.Library.Extensions
 {
@@ -32,8 +36,11 @@ namespace EFCore.CrudKit.Library.Extensions
         /// </summary>
         /// <param name="services"></param>
         /// <param name="asSingleton"></param>
-        public static void ConfigureMongoEFCoreDataForge(this IServiceCollection services, bool asSingleton = true)
+        public static void ConfigureMongoEFCoreDataForge(this IServiceCollection services, bool asSingleton = true, 
+            IdSerializationMode idSerializationMode = IdSerializationMode.ObjectId)
         {
+            ConfigureIdSerialization(idSerializationMode);
+
             if (asSingleton)
             {
                 services.AddSingleton<IEFCoreMongoCrudKit, EFCoreMongoCrudKit>();
@@ -54,9 +61,11 @@ namespace EFCore.CrudKit.Library.Extensions
         /// <param name="sectionName"></param>
         /// <param name="asSingleton"></param>
         public static void ConfigureEFCoreDataForgeManager<TContext>(this IServiceCollection services, 
-            IConfiguration configuration, string sectionName = "EFCoreDataForge", bool asSingleton = true) where TContext : DbContext
+            IConfiguration configuration, string sectionName = "EFCoreDataForge", bool asSingleton = true, 
+            IdSerializationMode idSerializationMode = IdSerializationMode.ObjectId) where TContext : DbContext
         {
             services.Configure<EFCoreDataForgeOptions>(configuration.GetSection(sectionName));
+            ConfigureIdSerialization(idSerializationMode);
 
             if (asSingleton)
             {
@@ -77,8 +86,11 @@ namespace EFCore.CrudKit.Library.Extensions
         /// <typeparam name="TContext"></typeparam>
         /// <param name="services"></param>
         /// <param name="asSingleton"></param>
-        public static void ConfigureEFCoreDataForgeManager<TContext>(this IServiceCollection services, bool asSingleton = true) where TContext : DbContext
+        public static void ConfigureEFCoreDataForgeManager<TContext>(this IServiceCollection services, bool asSingleton = true,
+            IdSerializationMode idSerializationMode = IdSerializationMode.ObjectId) where TContext : DbContext
         {
+            ConfigureIdSerialization(idSerializationMode);
+
             if (asSingleton)
             {
                 services.AddSingleton<IEFCoreDataForgeManager, EFCoreDataForgeManager<TContext>>();
@@ -86,6 +98,36 @@ namespace EFCore.CrudKit.Library.Extensions
             else
             {
                 services.AddScoped<IEFCoreDataForgeManager, EFCoreDataForgeManager<TContext>>();
+            }
+        }
+
+        public static void ConfigureIdSerialization(IdSerializationMode mode)
+        {
+            switch (mode)
+            {
+                case IdSerializationMode.ObjectId:
+                    // Default, store as ObjectId (no need to override usually)
+                    BsonSerializer.RegisterSerializer(
+                        typeof(ObjectId),
+                        new ObjectIdSerializer(BsonType.ObjectId)
+                    );
+                    break;
+
+                case IdSerializationMode.String:
+                    // Store ObjectIds as strings
+                    BsonSerializer.RegisterSerializer(
+                        typeof(ObjectId),
+                        new ObjectIdSerializer(BsonType.String)
+                    );
+                    break;
+
+                case IdSerializationMode.Guid:
+                    // Store Guid in Standard BSON binary format
+                    BsonSerializer.RegisterSerializer(
+                        typeof(Guid),
+                        new GuidSerializer(GuidRepresentation.Standard)
+                    );
+                    break;
             }
         }
     }

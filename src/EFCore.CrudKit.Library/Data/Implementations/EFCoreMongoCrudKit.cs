@@ -32,7 +32,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task InsertAsync<TCollection>(TCollection document,
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             await collection.InsertOneAsync(document, cancellationToken: token);
@@ -45,7 +45,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task InsertRangeAsync<TCollection>(List<TCollection> documents, 
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             await collection.InsertManyAsync(documents, cancellationToken: token);
@@ -60,7 +60,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task ReplaceAsync<TCollection>(Expression<Func<TCollection, bool>> predicate, 
-            TCollection document, CancellationToken token = default) where TCollection : MongoEntityBase
+            TCollection document, CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             await collection.ReplaceOneAsync<TCollection>(predicate, document, cancellationToken: token);
@@ -75,7 +75,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task UpdateOneAsync<TCollection>(TCollection document, Expression<Func<TCollection, bool>> predicate, 
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var filter = Builders<TCollection>.Filter.Where(predicate);
 
@@ -94,7 +94,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task DeleteAsync<TCollection>(Expression<Func<TCollection, bool>> predicate,
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             await collection.DeleteOneAsync(predicate, token);
@@ -108,7 +108,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="cancellation"></param>
         /// <returns></returns>
         public async Task DeleteRangeAsync<TCollection>(Expression<Func<TCollection, bool>> predicate, 
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             await collection.DeleteManyAsync(predicate, token);
@@ -122,7 +122,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task<TCollection?> FindOneAsync<TCollection>(Expression<Func<TCollection, bool>> predicate, 
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             return await collection.Find(predicate).FirstOrDefaultAsync(token);
@@ -136,7 +136,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task<List<TCollection>> FindAsync<TCollection>(Expression<Func<TCollection, bool>> predicate,
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             return await collection.Find(predicate).ToListAsync(token);
@@ -149,7 +149,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="predicate"></param>
         /// <param name="trackChanges"></param>
         /// <returns></returns>
-        public IQueryable<TCollection> AsQueryable<TCollection>(Expression<Func<TCollection, bool>> predicate) where TCollection : MongoEntityBase
+        public IQueryable<TCollection> AsQueryable<TCollection>(Expression<Func<TCollection, bool>> predicate) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             return collection.AsQueryable().Where(predicate);
@@ -163,7 +163,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="token"></param>
         /// <returns></returns>
         public async Task<long> CountAsync<TCollection>(Expression<Func<TCollection, bool>> predicate, 
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             return await collection.CountDocumentsAsync(predicate, cancellationToken: token);
@@ -176,7 +176,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
         /// <param name="predicate"></param>
         /// <returns></returns>
         public async Task<bool> ExistsAsync<TCollection>(Expression<Func<TCollection, bool>> predicate, 
-            CancellationToken token = default) where TCollection : MongoEntityBase
+            CancellationToken token = default) where TCollection : class
         {
             var collection = _database.GetCollection<TCollection>(typeof(TCollection).Name);
             return await (await collection.FindAsync(predicate, cancellationToken: token)).AnyAsync(token);

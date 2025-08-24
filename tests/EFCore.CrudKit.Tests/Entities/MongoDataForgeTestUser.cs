@@ -1,10 +1,9 @@
-﻿using EFCore.CrudKit.Library.Models;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
 namespace EFCore.CrudKit.Tests.Entities
 {
-    public class MongoDataForgeTestUser : MongoEntityBase
+    public class MongoDataForgeTestUser
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]
