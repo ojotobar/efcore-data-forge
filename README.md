@@ -97,16 +97,17 @@ public class User : MongoEntityBase
 builder.Services.ConfigureEFCoreDataForge<TDbContext>();
 
 // MongoDB
+// There two overloads of this method
+// The second overload have no need for adding configs in the appsettings.json
+// This assumes to have the IMongoDatabase instance registered in the DI
 builder.Services.ConfigureMongoEFCoreDataForge();
 
 // SQL and MongoDB
 // You only need to register this if you're going to use both SQL and MongoDB
 // Specify the appsettings.json section name. Default is EFCoreDataForge
-builder.Services.ConfigureEFCoreDataForgeManager<TContext>(builder.Configuration);
-
-// You may use this overload if you already have an instance of IMongoDatabase registered in the DI Container
+// You may use the overload if you already have an instance of IMongoDatabase registered in the DI Container
 // In this case, you don't know need to have the above configurations in your appsettings.json
-buider.Services.ConfigureEFCoreDataForgeManager<TContext>()
+builder.Services.ConfigureEFCoreDataForgeManager<TContext>(builder.Configuration);
 ```
 
 ---
