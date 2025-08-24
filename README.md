@@ -65,7 +65,7 @@ public abstract class EntityBase
 
 #### User
 ```csharp
-public class User
+public class User : EntityBase
 {
     public string Name { get; set; } = string.Empty;
 }
@@ -73,16 +73,9 @@ public class User
 
 ### 2. MongoDB: Entity Structure
 
-#### Entity Base (Your database entities must inherit this class)
-```csharp
-public abstract class MongoEntityBase
-{
-}
-```
-
 #### User
 ```csharp
-public class User : MongoEntityBase
+public class User
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)] // or BsonType.Binary if you prefer
