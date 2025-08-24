@@ -20,7 +20,7 @@ namespace EFCore.CrudKit.Library.Data.Implementations
                 new EFCoreMongoCrudKit(dataForgeSettings.Value));
         }
 
-        public EFCoreDataForgeManager(TContext dbContext, IMongoDatabase database)
+        internal EFCoreDataForgeManager(TContext dbContext, IMongoDatabase database)
         {
             _sqlrudKit = new Lazy<IEFCoreCrudKit>(() =>
                 new EFCoreCrudKit<TContext>(dbContext));

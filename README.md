@@ -65,7 +65,7 @@ public abstract class EntityBase
 
 #### User
 ```csharp
-public class User : EntityBase
+public class User
 {
     public string Name { get; set; } = string.Empty;
 }
@@ -97,17 +97,36 @@ public class User : MongoEntityBase
 builder.Services.ConfigureEFCoreDataForge<TDbContext>();
 
 // MongoDB
-// There two overloads of this method
-// The second overload have no need for adding configs in the appsettings.json
-// This assumes to have the IMongoDatabase instance registered in the DI
 builder.Services.ConfigureMongoEFCoreDataForge();
 
+// There is a non-public constructor you can call
+// if you already have an instance of IMongoDatabase registered
+builder.Services.AddScoped<IEFCoreMongoCrudKit>(sp =>
+{
+    var db = sp.GetRequiredService<IMongoDatabase>();
+    return (IEFCoreMongoCrudKit)Activator.CreateInstance(
+        typeof(EFCoreMongoCrudKit),
+        nonPublic: true, // allow internal/private ctor
+        args: new object[] { db } // pass in options
+    )!;
+});
+
 // SQL and MongoDB
-// You only need to register this if you're going to use both SQL and MongoDB
-// Specify the appsettings.json section name. Default is EFCoreDataForge
-// You may use the overload if you already have an instance of IMongoDatabase registered in the DI Container
-// In this case, you don't know need to have the above configurations in your appsettings.json
+// You need to register only this if you're going to use both SQL and MongoDB
 builder.Services.ConfigureEFCoreDataForgeManager<TContext>(builder.Configuration);
+
+// There is a non-public constructor you can call
+// if you already have an instance of IMongoDatabase registered
+builder.Services.AddScoped<IEFCoreDataForgeManager>(sp =>
+{
+    var context = sp.GetRequiredService<TContext>();
+    var db = sp.GetRequiredService<IMongoDatabase>();
+    return (IEFCoreDataForgeManager)Activator.CreateInstance(
+        typeof(EFCoreDataForgeManager),
+        nonPublic: true, // allow internal/private ctor
+        args: new object[] { context, db } // pass in options
+    )!;
+});
 ```
 
 ---
