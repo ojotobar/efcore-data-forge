@@ -216,7 +216,7 @@ namespace EFCore.CrudKit.Library.Data
             }
             else
             {
-                _query.Append($" AND ").Append(column).Append(" IN ")
+                _query.Append(column).Append(" IN ")
                     .Append('(').Append(guids.ToQuotedCsv()).Append(')');
             }
             return this;
