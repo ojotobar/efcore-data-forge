@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace EFCore.CrudKit.Library.Data
 {
-    public class EFCrudKitRepository<TEntity, UContext> 
+    public abstract class EFCrudKitRepository<TEntity, UContext> 
         where TEntity : EntityBase 
         where UContext : DbContext
     {
