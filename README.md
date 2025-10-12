@@ -104,6 +104,7 @@ builder.Services.AddSingleton<ISqlConnectionFactory>(sp =>
 builder.Services.AddScoped<IDapperForge, DapperForge>();
 ```
 
+Or inherit ```EFCrudKitRepository<TEntity, UContext>``` class in your repository
 ---
 
 ### Method Usage
