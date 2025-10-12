@@ -37,6 +37,17 @@ namespace EFCore.CrudKit.Library.Data
             }
         }
 
+        public async Task AddRangeAsync(List<TEntity> entity,
+                                   bool save = true,
+                                   CancellationToken cancellation = default)
+        {
+            await _context.Set<TEntity>().AddRangeAsync(entity, cancellation);
+            if (save)
+            {
+                await SaveAsync(cancellation);
+            }
+        }
+
         public async Task UpdateAsync(TEntity entity,
                                       bool save = true,
                                       CancellationToken cancellation = default)
