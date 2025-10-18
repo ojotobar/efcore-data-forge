@@ -21,9 +21,9 @@ namespace EFCore.CrudKit.Library.Data
         {
             return track ?
                 await _context.Set<TEntity>()
-                    .FindAsync(id, cancellation) : 
+                    .FirstOrDefaultAsync(i => i.Id == id, cancellation) : 
                 await _context.Set<TEntity>().AsNoTracking()
-                    .FirstAsync(e => e.Id == id, cancellation);
+                    .FirstOrDefaultAsync(e => e.Id == id, cancellation);
         }
 
         public async Task AddAsync(TEntity entity,
