@@ -1,4 +1,4 @@
-﻿using EFCore.CrudKit.Library.Models;
+﻿using KwikNesta.Contracts.Models;
 
 namespace EFCore.CrudKit.Tests.Entities
 {

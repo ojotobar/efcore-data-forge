@@ -1,4 +1,4 @@
-﻿using EFCore.CrudKit.Library.Models;
+﻿using KwikNesta.Contracts.Models;
 using System.Linq.Expressions;
 
 namespace EFCore.CrudKit.Library.Data.Interfaces
