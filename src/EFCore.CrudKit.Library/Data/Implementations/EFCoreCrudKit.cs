@@ -1,5 +1,5 @@
 ﻿using EFCore.CrudKit.Library.Data.Interfaces;
-using EFCore.CrudKit.Library.Models;
+using KwikNesta.Contracts.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
